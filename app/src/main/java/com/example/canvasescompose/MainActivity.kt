@@ -53,7 +53,7 @@ class MainActivity : ComponentActivity() {
                         modifier = Modifier
                             .fillMaxSize()
                             .background(Color(0xFF101010))
-                    ){
+                    ) {
                         Row(
                             horizontalArrangement = Arrangement.Center,
                             verticalAlignment = Alignment.CenterVertically,
@@ -68,9 +68,10 @@ class MainActivity : ComponentActivity() {
                                 viewModel.updateVolume(it)
                             }
                             Spacer(modifier = Modifier.width(20.dp))
-                            VolumeBar(modifier = Modifier
-                                .fillMaxWidth()
-                                .height(30.dp),
+                            VolumeBar(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(30.dp),
                                 activeBars = (barCount * volume.value).roundToInt(),
                                 barCount = barCount
                             )
@@ -97,10 +98,10 @@ fun VolumeBar(
             constraints.maxWidth / (2f * barCount)
         }
         Canvas(modifier = modifier) {
-            for( i in 0 until barCount){
+            for (i in 0 until barCount) {
                 drawRoundRect(
-                    color = if( i in 0..activeBars) Color.Green else Color.DarkGray,
-                    topLeft = Offset(i * barWidth * 2f + barWidth/2f, 0f),
+                    color = if (i in 0..activeBars) Color.Green else Color.DarkGray,
+                    topLeft = Offset(i * barWidth * 2f + barWidth / 2f, 0f),
                     size = Size(barWidth, constraints.maxHeight.toFloat()),
                     cornerRadius = CornerRadius(2f)
                 )
@@ -175,14 +176,13 @@ fun MusicKnob(
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun MusicKnobCanvas(
+    viewModel: SharedViewModel = hiltViewModel(),
     modifier: Modifier = Modifier,
     limitingAngle: Float = 25f,
     onValueChange: (Float) -> Unit
 ) {
     //rotation angle
-    var rotation by remember {
-        mutableStateOf(limitingAngle)
-    }
+    var rotation = viewModel.rotation.collectAsState()
 
     //touches
     var touchX by remember {
@@ -214,7 +214,7 @@ fun MusicKnobCanvas(
                             } else {
                                 angle
                             }
-                            rotation = fixedAngle
+                            viewModel.updateRotation(fixedAngle)
                             val percent = (fixedAngle - limitingAngle) / (360f - 2 * limitingAngle)
                             onValueChange(percent)
                             true
@@ -223,7 +223,7 @@ fun MusicKnobCanvas(
                     else -> false
                 }
             }
-            .rotate(rotation)
+            .rotate(rotation.value)
     ) {
         drawCircle(color = Color.LightGray)
         drawCircle(
@@ -232,8 +232,8 @@ fun MusicKnobCanvas(
         )
         drawLine(
             Color.DarkGray,
-            start = Offset(this.size.width / 2, this.size.height - 15),
-            end = Offset(this.size.width / 2, this.size.height - 20),
+            start = Offset(this.size.width/2, this.size.height + 15),
+            end = Offset(this.center.x, this.size.height + 20),
             strokeWidth = 10f,
             cap = StrokeCap.Round
         )
